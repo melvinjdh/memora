@@ -107,6 +107,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: data.email.trim().toLowerCase(),
       password: data.password,
+      options: {
+        data: {
+          name: data.name,
+          phone: data.phone,
+        }
+      }
     });
 
     if (authError) throw new Error(authError.message);
