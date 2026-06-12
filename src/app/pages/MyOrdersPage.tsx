@@ -52,11 +52,11 @@ const fmtDate = (iso?: string) => {
 const rp = (n: number) => `Rp ${Number(n || 0).toLocaleString('id-ID')}`;
 
 const statusMeta: Record<string, { label: string; cls: string }> = {
-  pending: { label: 'Pesanan disiapkan', cls: 'border-sky-400/30 bg-sky-400/10 text-sky-300' },
-  pending_payment_simulation: { label: 'Pesanan disiapkan', cls: 'border-sky-400/30 bg-sky-400/10 text-sky-300' },
-  confirmed: { label: 'Bisa diambil', cls: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' },
-  paid: { label: 'Bisa diambil', cls: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' },
-  completed: { label: 'Selesai', cls: 'border-[#b59a5b]/40 bg-[#b59a5b]/15 text-[#c9ad6e]' },
+  pending: { label: 'Tiket belum terbit', cls: 'border-sky-400/30 bg-sky-400/10 text-sky-300' },
+  pending_payment_simulation: { label: 'Tiket belum terbit', cls: 'border-sky-400/30 bg-sky-400/10 text-sky-300' },
+  confirmed: { label: 'Tiket sudah terbit', cls: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' },
+  paid: { label: 'Tiket sudah terbit', cls: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300' },
+  completed: { label: 'Berhasil', cls: 'border-[#b59a5b]/40 bg-[#b59a5b]/15 text-[#c9ad6e]' },
   cancelled: { label: 'Dibatalkan', cls: 'border-red-400/30 bg-red-400/10 text-red-300' },
 };
 
@@ -434,7 +434,6 @@ const handleConfirmMerchandiseReceived = async (item: FlatItem) => {
                           {guideName}
                         </h3>
                       </div>
-                      <StatusPill status={guide.orderStatus} />
                     </div>
 
                     <div className="mt-4 grid grid-cols-2 gap-3 rounded-2xl border border-[#b59a5b]/10 bg-[#0a1f1a]/40 p-4 text-sm">
