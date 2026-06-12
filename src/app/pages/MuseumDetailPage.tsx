@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import {
   MapPin, Clock, Ticket, Bus, Car, Train, UtensilsCrossed,
   Wifi, Coffee, ParkingCircle, Accessibility, ChevronRight, Plus, Minus,
-  ArrowLeft, CalendarDays, ExternalLink,
+  ArrowLeft, CalendarDays, ExternalLink, AlertCircle,
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
@@ -109,6 +109,47 @@ export const MuseumDetailPage: React.FC = () => {
 
   const isClosed = museum.isOpen === false;
 
+  // HELPER: Cek apakah hari cocok dengan string hari operasional
+  const isDayMatch = useCallback((dayStr: string, date: Date): boolean => {
+    const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const dayName = dayNames[date.getDay()];
+    const lower = dayStr.toLowerCase();
+
+    if (lower.includes(dayName.toLowerCase())) return true;
+
+    const rangeMatch = dayStr.match(/(\w+)\s*[-\u2013]\s*(\w+)/);
+    if (rangeMatch) {
+      const startIdx = dayNames.findIndex(d => d.toLowerCase() === rangeMatch[1].toLowerCase());
+      const endIdx = dayNames.findIndex(d => d.toLowerCase() === rangeMatch[2].toLowerCase());
+      const currentIdx = date.getDay();
+      if (startIdx !== -1 && endIdx !== -1) {
+        if (startIdx <= endIdx) return currentIdx >= startIdx && currentIdx <= endIdx;
+        else return currentIdx >= startIdx || currentIdx <= endIdx;
+      }
+    }
+
+    if (lower.includes('setiap hari')) return true;
+    return false;
+  }, []);
+
+  // Cek apakah museum tutup pada tanggal tertentu berdasarkan operatingHours
+  const isMuseumClosedOnDate = useCallback((date: Date): boolean => {
+    if (isClosed) return true;
+    if (!museum.operatingHours || museum.operatingHours.length === 0) return false;
+
+    for (const schedule of museum.operatingHours) {
+      if (isDayMatch(schedule.day, date)) {
+        if (schedule.hours.toLowerCase().includes('tutup')) return true;
+        return false; // Ada jadwal buka
+      }
+    }
+    // Tidak ada jadwal yang cocok = tutup
+    return true;
+  }, [isClosed, museum.operatingHours, isDayMatch]);
+
+  // Cek apakah tanggal yang dipilih jatuh di hari tutup
+  const isSelectedDateClosed = visitDate ? isMuseumClosedOnDate(visitDate) : false;
+
   const mapEmbedSrc = `https://maps.google.com/maps?q=${encodeURIComponent(museum.location)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
   const mapsSearch = (q: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
 
@@ -135,6 +176,10 @@ export const MuseumDetailPage: React.FC = () => {
   const handleAddToCart = () => {
     if (!visitDate) {
       toast.error('Pilih tanggal kunjungan dulu ya');
+      return;
+    }
+    if (isSelectedDateClosed) {
+      toast.error('Museum tutup pada tanggal yang dipilih. Silakan pilih tanggal lain.');
       return;
     }
 
@@ -166,7 +211,7 @@ export const MuseumDetailPage: React.FC = () => {
     return sum + (ticket?.price || 0) * qty;
   }, 0);
 
-  const showPurchaseBar = totalTickets > 0 && !isClosed;
+  const showPurchaseBar = totalTickets > 0 && !isClosed && !isSelectedDateClosed;
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'facilities', label: 'Fasilitas' },
@@ -456,11 +501,24 @@ export const MuseumDetailPage: React.FC = () => {
                         setVisitDate(date);
                         setShowCalendar(false);
                       }}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        if (date < today) return true;
+                        return isMuseumClosedOnDate(date);
+                      }}
                     />
                   </div>
                 )}
               </div>
+
+              {/* Warning tanggal tutup */}
+              {visitDate && isSelectedDateClosed && (
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-[#ef4444]/25 bg-[#ef4444]/10 px-4 py-3 text-sm text-[#fca5a5]">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <span>Museum <strong>tutup</strong> pada tanggal ini. Silakan pilih tanggal lain.</span>
+                </div>
+              )}
 
               {/* Ticket rows */}
               <div className="mt-4 space-y-3">
