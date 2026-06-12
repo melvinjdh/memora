@@ -34,9 +34,17 @@ export const RegisterPage: React.FC = () => {
     try {
       await register(formData);
       toast.success('Account created successfully!');
-      navigate('/dashboard');
-    } catch {
-      toast.error('Registration failed. Please try again.');
+      navigate('/profile');
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      const errorMessage = err?.message || 'Registration failed. Please try again.';
+      
+      // Handle Supabase 429 Rate Limit
+      if (errorMessage.toLowerCase().includes('rate limit')) {
+        toast.error('Terlalu banyak percobaan pendaftaran (Rate Limit). Silakan coba lagi dalam beberapa menit, atau gunakan email lain.');
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
