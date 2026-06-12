@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import {
   MapPin, Clock, Ticket, Bus, Car, Train, UtensilsCrossed,
@@ -110,7 +110,7 @@ export const MuseumDetailPage: React.FC = () => {
   const isClosed = museum.isOpen === false;
 
   // HELPER: Cek apakah hari cocok dengan string hari operasional
-  const isDayMatch = useCallback((dayStr: string, date: Date): boolean => {
+  const isDayMatch = (dayStr: string, date: Date): boolean => {
     const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
     const dayName = dayNames[date.getDay()];
     const lower = dayStr.toLowerCase();
@@ -130,22 +130,21 @@ export const MuseumDetailPage: React.FC = () => {
 
     if (lower.includes('setiap hari')) return true;
     return false;
-  }, []);
+  };
 
   // Cek apakah museum tutup pada tanggal tertentu berdasarkan operatingHours
-  const isMuseumClosedOnDate = useCallback((date: Date): boolean => {
+  const isMuseumClosedOnDate = (date: Date): boolean => {
     if (isClosed) return true;
     if (!museum.operatingHours || museum.operatingHours.length === 0) return false;
 
     for (const schedule of museum.operatingHours) {
       if (isDayMatch(schedule.day, date)) {
         if (schedule.hours.toLowerCase().includes('tutup')) return true;
-        return false; // Ada jadwal buka
+        return false;
       }
     }
-    // Tidak ada jadwal yang cocok = tutup
     return true;
-  }, [isClosed, museum.operatingHours, isDayMatch]);
+  };
 
   // Cek apakah tanggal yang dipilih jatuh di hari tutup
   const isSelectedDateClosed = visitDate ? isMuseumClosedOnDate(visitDate) : false;
