@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase/supabase'; // Pastikan path ini sesuai dengan folder Anda
 
 interface CartItem {
@@ -89,6 +90,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Idle Timer / Session Timeout Effect
+  useEffect(() => {
+    // Only track idle session if user is logged in
+    if (!user) return;
+
+    let timeoutId: NodeJS.Timeout;
+    const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
+
+    const handleIdleTimeout = () => {
+      supabase.auth.signOut().then(() => {
+        setUser(null);
+        toast.error('Sesi masuk telah berakhir karena tidak ada aktivitas. Silakan login kembali.', { duration: 8000 });
+      });
+    };
+
+    const resetTimer = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(handleIdleTimeout, IDLE_TIMEOUT);
+    };
+
+    const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'];
+    events.forEach(event => window.addEventListener(event, resetTimer));
+    resetTimer(); // Initialize timer
+
+    return () => {
+      clearTimeout(timeoutId);
+      events.forEach(event => window.removeEventListener(event, resetTimer));
+    };
+  }, [user]);
 
   const login = async (email: string, password: string) => {
     const { data, error } = await supabase.auth.signInWithPassword({
