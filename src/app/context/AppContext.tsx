@@ -125,8 +125,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
       if (profileError) console.error("Gagal buat profil:", profileError);
       
-      const profile = await fetchProfile(authData.user.id);
-      setUser(profile);
+      // Jika ada session, berarti auto-login (email konfirmasi mati). Jika null, berarti butuh verifikasi email.
+      if (authData.session) {
+        const profile = await fetchProfile(authData.user.id);
+        setUser(profile);
+      }
     }
   };
 
