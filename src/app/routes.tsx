@@ -12,6 +12,7 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { MyTicketsPage } from './pages/MyTicketsPage';
@@ -41,6 +42,7 @@ export const router = createBrowserRouter([
       { path: 'login', Component: LoginPage },
       { path: 'reset-password', Component: ResetPasswordPage },
       { path: 'register', Component: RegisterPage },
+      { path: 'verify-email', Component: VerifyEmailPage },
       { path: 'dashboard', Component: DashboardPage },
       { path: 'my-tickets', Component: MyTicketsPage },
       { path: 'my-orders', Component: MyOrdersPage },

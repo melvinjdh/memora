@@ -33,10 +33,8 @@ export const RegisterPage: React.FC = () => {
 
     try {
       await register(formData);
-      toast.success('Pendaftaran berhasil! Silakan cek kotak masuk atau folder spam email Anda untuk memverifikasi akun.', {
-        duration: 8000,
-      });
-      navigate('/login');
+      toast.success('Pendaftaran berhasil!');
+      navigate(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (err: any) {
       console.error('Registration error:', err);
       const errorMessage = err?.message || 'Registration failed. Please try again.';
