@@ -277,6 +277,29 @@ export const CheckoutPage: React.FC = () => {
 
       if (itemsError) throw itemsError;
 
+      // 3. Menyimpan pemesanan pemandu ke tabel guide_bookings (untuk mencegah konflik jam)
+      const guideItems = finalOrder.items.filter((it: any) => it.type === 'guide' && it.details);
+      if (guideItems.length > 0) {
+        const guideBookings = guideItems.map((it: any) => ({
+          guide_id: it.details.guideId,
+          user_id: user?.id,
+          booking_date: it.details.bookingDate || new Date(it.details.date).toISOString().split('T')[0],
+          start_hour: it.details.startHour,
+          duration_hours: it.details.duration,
+          museum: it.details.museum,
+          status: 'confirmed',
+        }));
+
+        const { error: bookingError } = await supabase
+          .from('guide_bookings')
+          .insert(guideBookings);
+
+        if (bookingError) {
+          console.error('Gagal menyimpan booking pemandu:', bookingError);
+          toast.warning('Pesanan berhasil, namun slot pemandu mungkin belum terkunci.');
+        }
+      }
+
       clearCart();
       toast.success('Pembayaran berhasil diproses dan disimpan.');
       navigate(`/order-confirmation/${insertedOrder.id}`); // Melempar ID unik database ke halaman konfirmasi

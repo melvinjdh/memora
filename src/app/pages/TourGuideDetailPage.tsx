@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
-import { ArrowLeft, Award, Calendar as CalendarIcon, Languages, Star, Quote, Landmark, MessageSquareQuote } from 'lucide-react';
+import { ArrowLeft, Award, Calendar as CalendarIcon, Clock, Languages, Star, Quote, Landmark, MessageSquareQuote, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 // Hapus baris ini: import { tourGuides } from '../data/mockData';
@@ -29,8 +29,11 @@ export const TourGuideDetailPage: React.FC = () => {
 
   const [bookingDate, setBookingDate] = useState<Date>();
   const [selectedMuseum, setSelectedMuseum] = useState('');
-  const [selectedSlots, setSelectedSlots] = useState<string[]>([]);
+  const [selectedStartHour, setSelectedStartHour] = useState<number | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<number>(1);
   const [showCalendar, setShowCalendar] = useState(false);
+  const [bookedHours, setBookedHours] = useState<number[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
 
   // Entrance: slide-up dari bawah saat halaman dibuka
   const [entered, setEntered] = useState(false);
@@ -86,6 +89,44 @@ export const TourGuideDetailPage: React.FC = () => {
     }
   }, [id]);
 
+  // FETCH JAM YANG SUDAH DIPESAN DARI SUPABASE
+  const fetchBookedHours = useCallback(async () => {
+    if (!bookingDate || !guide?.id) return;
+    setLoadingSlots(true);
+    try {
+      const dateStr = format(bookingDate, 'yyyy-MM-dd');
+      const { data, error } = await supabase
+        .from('guide_bookings')
+        .select('start_hour, duration_hours')
+        .eq('guide_id', guide.id)
+        .eq('booking_date', dateStr)
+        .eq('status', 'confirmed');
+
+      if (error) throw error;
+
+      // Hitung semua jam yang sudah terisi
+      const occupied: number[] = [];
+      (data || []).forEach((booking: any) => {
+        for (let h = booking.start_hour; h < booking.start_hour + booking.duration_hours; h++) {
+          if (!occupied.includes(h)) occupied.push(h);
+        }
+      });
+      setBookedHours(occupied);
+    } catch (err) {
+      console.error('Gagal mengambil data booking:', err);
+      setBookedHours([]);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, [bookingDate, guide?.id]);
+
+  useEffect(() => {
+    fetchBookedHours();
+    // Reset pilihan jam saat tanggal berubah
+    setSelectedStartHour(null);
+    setSelectedDuration(1);
+  }, [fetchBookedHours]);
+
   // Layar tunggu
   if (isLoading) {
     return (
@@ -115,16 +156,47 @@ export const TourGuideDetailPage: React.FC = () => {
     );
   }
 
+  // Semua slot jam yang tersedia (08:00 - 17:00)
+  const ALL_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+
+  // Cek apakah suatu jam sudah dipesan
+  const isHourBooked = (hour: number) => bookedHours.includes(hour);
+
+  // Hitung durasi maksimal yang bisa dipilih dari jam mulai tertentu
+  const getMaxDuration = (startHour: number): number => {
+    let max = 0;
+    for (let h = startHour; h <= 17; h++) {
+      if (isHourBooked(h)) break;
+      max++;
+    }
+    return max;
+  };
+
+  // Cek apakah range jam yang dipilih ada konflik
+  const hasConflict = (startHour: number, duration: number): boolean => {
+    for (let h = startHour; h < startHour + duration; h++) {
+      if (isHourBooked(h)) return true;
+    }
+    return false;
+  };
+
   const handleBooking = () => {
-    if (!bookingDate || !selectedMuseum || selectedSlots.length === 0) {
-      toast.error('Pilih tanggal, jam, dan durasi terlebih dahulu');
+    if (!bookingDate || !selectedMuseum || selectedStartHour === null) {
+      toast.error('Pilih tanggal, museum, dan jam mulai terlebih dahulu');
       return;
     }
 
-    const totalPrice = guide.pricePerHour * selectedSlots.length;
+    // Double-check konflik sebelum submit
+    if (hasConflict(selectedStartHour, selectedDuration)) {
+      toast.error('Jam yang dipilih sudah terisi oleh pemesanan lain. Silakan pilih jam lain.');
+      return;
+    }
+
+    const totalPrice = guide.pricePerHour * selectedDuration;
+    const endHour = selectedStartHour + selectedDuration;
 
     addToCart({
-      id: `guide-${guide.id}-${bookingDate.getTime()}`,
+      id: `guide-${guide.id}-${bookingDate.getTime()}-${selectedStartHour}`,
       type: 'guide',
       name: `Pemandu Wisata: ${guide.name}`,
       price: totalPrice,
@@ -133,17 +205,18 @@ export const TourGuideDetailPage: React.FC = () => {
         guideId: guide.id,
         guideName: guide.name,
         date: bookingDate.toISOString(),
+        bookingDate: format(bookingDate, 'yyyy-MM-dd'),
         museum: selectedMuseum,
-        slots: selectedSlots,
-        duration: selectedSlots.length,
+        startHour: selectedStartHour,
+        duration: selectedDuration,
+        endHour: endHour,
+        slots: Array.from({ length: selectedDuration }, (_, i) => `${String(selectedStartHour + i).padStart(2, '0')}:00`),
         pricePerHour: guide.pricePerHour,
       },
     });
 
     toast.success('Pemesanan pemandu berhasil ditambahkan ke keranjang');
   };
-
-  const availableSlots = ['09:00', '10:30', '13:00', '14:30', '16:00'];
 
   return (
     <div
@@ -267,39 +340,94 @@ export const TourGuideDetailPage: React.FC = () => {
 
                     {bookingDate && selectedMuseum && (
                       <div>
-                        <Label className="text-[#c8c2b8]">Jam Tersedia</Label>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {availableSlots.map((slot) => {
-                            const active = selectedSlots.includes(slot);
-                            return (
-                              <button
-                                key={slot}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedSlots((prev) =>
-                                    prev.includes(slot) ? prev.filter((s) => s !== slot) : [...prev, slot].sort()
-                                  );
-                                }}
-                                className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                                  active ? 'bg-[#b59a5b] text-[#0a1f1a]' : 'border border-[#b59a5b]/25 text-[#c8c2b8] hover:bg-[#b59a5b]/10'
-                                }`}
-                              >
-                                {slot}
-                              </button>
-                            );
-                          })}
-                        </div>
+                        <Label className="text-[#c8c2b8]">Pilih Jam Mulai</Label>
+                        {loadingSlots ? (
+                          <div className="mt-2 flex items-center gap-2 text-sm text-[#a09a90]">
+                            <Clock className="h-4 w-4 animate-spin" />
+                            Memuat ketersediaan jam...
+                          </div>
+                        ) : (
+                          <>
+                            <div className="mt-2 grid grid-cols-5 gap-2">
+                              {ALL_HOURS.map((hour) => {
+                                const booked = isHourBooked(hour);
+                                const active = selectedStartHour === hour;
+                                const inRange = selectedStartHour !== null && 
+                                  hour >= selectedStartHour && 
+                                  hour < selectedStartHour + selectedDuration;
+                                return (
+                                  <button
+                                    key={hour}
+                                    type="button"
+                                    disabled={booked}
+                                    onClick={() => {
+                                      if (booked) return;
+                                      setSelectedStartHour(hour);
+                                      // Reset durasi ke 1 dan hitung max
+                                      const max = getMaxDuration(hour);
+                                      setSelectedDuration(Math.min(1, max));
+                                    }}
+                                    className={`relative rounded-xl px-2 py-2.5 text-sm font-semibold transition ${
+                                      booked
+                                        ? 'cursor-not-allowed border border-red-500/20 bg-red-900/20 text-red-400/60 line-through'
+                                        : active
+                                          ? 'bg-[#b59a5b] text-[#0a1f1a] shadow-[0_4px_16px_-4px_rgba(181,154,91,.6)]'
+                                          : inRange
+                                            ? 'bg-[#b59a5b]/40 text-[#f0ebe3] border border-[#b59a5b]/50'
+                                            : 'border border-[#b59a5b]/25 text-[#c8c2b8] hover:bg-[#b59a5b]/10'
+                                    }`}
+                                  >
+                                    {String(hour).padStart(2, '0')}:00
+                                    {booked && (
+                                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[8px] text-white">
+                                        ✕
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                            </div>
+
+                            {bookedHours.length > 0 && (
+                              <div className="mt-2 flex items-start gap-1.5 text-xs text-red-400/80">
+                                <AlertCircle className="mt-0.5 h-3 w-3 shrink-0" />
+                                <span>Jam bertanda merah sudah dipesan customer lain</span>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
                     )}
 
-                    {bookingDate && selectedMuseum && selectedSlots.length > 0 && (
+                    {bookingDate && selectedMuseum && selectedStartHour !== null && (
+                      <div>
+                        <Label className="text-[#c8c2b8]">Durasi Tur</Label>
+                        <Select
+                          value={String(selectedDuration)}
+                          onValueChange={(val) => setSelectedDuration(Number(val))}
+                        >
+                          <SelectTrigger className="mt-2 rounded-xl border-[#b59a5b]/20 bg-[#0a1f1a]/40">
+                            <SelectValue placeholder="Pilih durasi" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({ length: getMaxDuration(selectedStartHour) }, (_, i) => i + 1).map((dur) => (
+                              <SelectItem key={dur} value={String(dur)}>
+                                {dur} Jam ({String(selectedStartHour).padStart(2, '0')}:00 — {String(selectedStartHour + dur).padStart(2, '0')}:00)
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+
+                    {bookingDate && selectedMuseum && selectedStartHour !== null && (
                       <div className="space-y-2 border-t border-[#b59a5b]/12 pt-4 text-sm">
                         <div className="flex justify-between"><span className="text-[#a09a90]">Museum</span><span>{selectedMuseum}</span></div>
                         <div className="flex justify-between"><span className="text-[#a09a90]">Tanggal</span><span>{format(bookingDate, 'dd/MM/yyyy')}</span></div>
-                        <div className="flex justify-between"><span className="text-[#a09a90]">Jam Dipilih</span><span className="text-right">{selectedSlots.join(', ')}</span></div>
-                        <div className="flex justify-between"><span className="text-[#a09a90]">Jumlah Slot</span><span>{selectedSlots.length} Jam</span></div>
+                        <div className="flex justify-between"><span className="text-[#a09a90]">Jam Tur</span><span className="text-right">{String(selectedStartHour).padStart(2, '0')}:00 — {String(selectedStartHour + selectedDuration).padStart(2, '0')}:00</span></div>
+                        <div className="flex justify-between"><span className="text-[#a09a90]">Durasi</span><span>{selectedDuration} Jam</span></div>
                         <div className="flex justify-between"><span className="text-[#a09a90]">Tarif/Jam</span><span>Rp {guide.pricePerHour.toLocaleString('id-ID')}</span></div>
-                        <div className="flex justify-between pt-1 text-base font-bold"><span>Total</span><span className="text-[#c9ad6e]">Rp {(guide.pricePerHour * selectedSlots.length).toLocaleString('id-ID')}</span></div>
+                        <div className="flex justify-between pt-1 text-base font-bold"><span>Total</span><span className="text-[#c9ad6e]">Rp {(guide.pricePerHour * selectedDuration).toLocaleString('id-ID')}</span></div>
                       </div>
                     )}
 
