@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Landmark } from 'lucide-react';
+import { toast } from 'sonner';
+import { useApp } from '../context/AppContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { useApp } from '../context/AppContext';
-import { toast } from 'sonner';
+import { PasswordField } from '../components/PasswordField';
 
 export const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,13 +17,13 @@ export const RegisterPage: React.FC = () => {
     email: '',
     phone: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
   });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -34,7 +35,7 @@ export const RegisterPage: React.FC = () => {
       await register(formData);
       toast.success('Account created successfully!');
       navigate('/dashboard');
-    } catch (error) {
+    } catch {
       toast.error('Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
@@ -42,18 +43,18 @@ export const RegisterPage: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-muted/30">
+    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="h-12 w-12 rounded-lg bg-primary flex items-center justify-center">
+          <div className="mb-4 flex justify-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
               <Landmark className="h-7 w-7 text-primary-foreground" />
             </div>
           </div>
@@ -62,7 +63,7 @@ export const RegisterPage: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="name">Full Name</Label>
               <Input
                 id="name"
@@ -73,7 +74,7 @@ export const RegisterPage: React.FC = () => {
                 required
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -85,7 +86,7 @@ export const RegisterPage: React.FC = () => {
                 required
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="phone">Phone Number</Label>
               <Input
                 id="phone"
@@ -97,30 +98,26 @@ export const RegisterPage: React.FC = () => {
                 required
               />
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                placeholder="••••••••"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            </div>
+            <PasswordField
+              id="password"
+              name="password"
+              label="Password"
+              placeholder="Masukkan password"
+              value={formData.password}
+              onChange={handleChange}
+              autoComplete="new-password"
+              required
+            />
+            <PasswordField
+              id="confirmPassword"
+              name="confirmPassword"
+              label="Confirm Password"
+              placeholder="Ulangi password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              autoComplete="new-password"
+              required
+            />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Sign Up'}
             </Button>

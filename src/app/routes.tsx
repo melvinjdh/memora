@@ -12,6 +12,7 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { OrderConfirmationPage } from './pages/OrderConfirmationPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { MyTicketsPage } from './pages/MyTicketsPage';
 import { MyOrdersPage } from './pages/MyOrdersPage';
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       { path: 'checkout', Component: CheckoutPage },
       { path: 'order-confirmation/:orderId', Component: OrderConfirmationPage },
       { path: 'login', Component: LoginPage },
+      { path: 'reset-password', Component: ResetPasswordPage },
       { path: 'register', Component: RegisterPage },
       { path: 'dashboard', Component: DashboardPage },
       { path: 'my-tickets', Component: MyTicketsPage },

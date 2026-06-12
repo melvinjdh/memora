@@ -2,80 +2,80 @@
 
 :root {
   --font-size: 16px;
-  --background: #ffffff;
-  --foreground: #0a2317;
-  --card: #ffffff;
-  --card-foreground: #0a2317;
-  --popover: #ffffff;
-  --popover-foreground: #0a2317;
-  --primary: #047857;
-  --primary-foreground: #ffffff;
-  --secondary: #d1fae5;
-  --secondary-foreground: #064e3b;
-  --muted: #f0fdf4;
-  --muted-foreground: #6b7280;
-  --accent: #10b981;
-  --accent-foreground: #ffffff;
+  --background: #0a1f1a;
+  --foreground: #f0ebe3;
+  --card: #12382d;
+  --card-foreground: #f0ebe3;
+  --popover: #12382d;
+  --popover-foreground: #f0ebe3;
+  --primary: #b59a5b;
+  --primary-foreground: #0a1f1a;
+  --secondary: #1a4d3e;
+  --secondary-foreground: #f0ebe3;
+  --muted: #12382d;
+  --muted-foreground: #a09a90;
+  --accent: #b59a5b;
+  --accent-foreground: #0a1f1a;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: rgba(16, 185, 129, 0.2);
-  --input: transparent;
-  --input-background: #f9fafb;
-  --switch-background: #d1d5db;
-  --font-weight-medium: 500;
+  --border: rgba(181, 154, 91, 0.14);
+  --input: rgba(240, 235, 227, 0.08);
+  --input-background: #12382d;
+  --switch-background: #2d3533;
+  --font-weight-medium: 600;
   --font-weight-normal: 400;
-  --ring: #10b981;
-  --chart-1: #047857;
-  --chart-2: #10b981;
-  --chart-3: #34d399;
-  --chart-4: #6ee7b7;
-  --chart-5: #a7f3d0;
-  --radius: 0.625rem;
-  --sidebar: #f9fafb;
-  --sidebar-foreground: #0a2317;
-  --sidebar-primary: #047857;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f0fdf4;
-  --sidebar-accent-foreground: #064e3b;
-  --sidebar-border: rgba(16, 185, 129, 0.2);
-  --sidebar-ring: #10b981;
+  --ring: #b59a5b;
+  --chart-1: #b59a5b;
+  --chart-2: #c9ad6e;
+  --chart-3: #22614f;
+  --chart-4: #1a4d3e;
+  --chart-5: #f0ebe3;
+  --radius: 1rem;
+  --sidebar: #12382d;
+  --sidebar-foreground: #f0ebe3;
+  --sidebar-primary: #b59a5b;
+  --sidebar-primary-foreground: #0a1f1a;
+  --sidebar-accent: #1a4d3e;
+  --sidebar-accent-foreground: #f0ebe3;
+  --sidebar-border: rgba(181, 154, 91, 0.14);
+  --sidebar-ring: #b59a5b;
 }
 
 .dark {
-  --background: #0a2317;
-  --foreground: #f0fdf4;
-  --card: #064e3b;
-  --card-foreground: #f0fdf4;
-  --popover: #064e3b;
-  --popover-foreground: #f0fdf4;
-  --primary: #10b981;
-  --primary-foreground: #0a2317;
-  --secondary: #064e3b;
-  --secondary-foreground: #d1fae5;
-  --muted: #064e3b;
-  --muted-foreground: #9ca3af;
-  --accent: #047857;
-  --accent-foreground: #d1fae5;
-  --destructive: #dc2626;
+  --background: #0a1f1a;
+  --foreground: #f0ebe3;
+  --card: #12382d;
+  --card-foreground: #f0ebe3;
+  --popover: #12382d;
+  --popover-foreground: #f0ebe3;
+  --primary: #b59a5b;
+  --primary-foreground: #0a1f1a;
+  --secondary: #1a4d3e;
+  --secondary-foreground: #f0ebe3;
+  --muted: #12382d;
+  --muted-foreground: #a09a90;
+  --accent: #b59a5b;
+  --accent-foreground: #0a1f1a;
+  --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: rgba(16, 185, 129, 0.3);
-  --input: rgba(16, 185, 129, 0.2);
-  --ring: #10b981;
-  --font-weight-medium: 500;
+  --border: rgba(181, 154, 91, 0.14);
+  --input: rgba(240, 235, 227, 0.08);
+  --ring: #b59a5b;
+  --font-weight-medium: 600;
   --font-weight-normal: 400;
-  --chart-1: #10b981;
-  --chart-2: #34d399;
-  --chart-3: #6ee7b7;
-  --chart-4: #a7f3d0;
-  --chart-5: #d1fae5;
-  --sidebar: #064e3b;
-  --sidebar-foreground: #f0fdf4;
-  --sidebar-primary: #10b981;
-  --sidebar-primary-foreground: #0a2317;
-  --sidebar-accent: #047857;
-  --sidebar-accent-foreground: #d1fae5;
-  --sidebar-border: rgba(16, 185, 129, 0.3);
-  --sidebar-ring: #10b981;
+  --chart-1: #b59a5b;
+  --chart-2: #c9ad6e;
+  --chart-3: #22614f;
+  --chart-4: #1a4d3e;
+  --chart-5: #f0ebe3;
+  --sidebar: #12382d;
+  --sidebar-foreground: #f0ebe3;
+  --sidebar-primary: #b59a5b;
+  --sidebar-primary-foreground: #0a1f1a;
+  --sidebar-accent: #1a4d3e;
+  --sidebar-accent-foreground: #f0ebe3;
+  --sidebar-border: rgba(181, 154, 91, 0.14);
+  --sidebar-ring: #b59a5b;
 }
 
 @theme inline {
@@ -105,10 +105,10 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 8px);
+  --radius-md: calc(var(--radius) - 4px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --radius-xl: calc(var(--radius) + 8px);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -124,50 +124,46 @@
     @apply border-border outline-ring/50;
   }
 
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  /**
-  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
-  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
-  */
-
   html {
     font-size: var(--font-size);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  input {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1, h2, h3, h4 {
+    letter-spacing: -0.025em;
   }
 
   h1 {
     font-size: var(--text-2xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    font-weight: 700;
+    line-height: 1.2;
   }
 
   h2 {
     font-size: var(--text-xl);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    font-weight: 700;
+    line-height: 1.25;
   }
 
   h3 {
     font-size: var(--text-lg);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    font-weight: 700;
+    line-height: 1.3;
   }
 
-  h4 {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  label {
-    font-size: var(--text-base);
-    font-weight: var(--font-weight-medium);
-    line-height: 1.5;
-  }
-
-  button {
+  h4, label, button {
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
@@ -177,5 +173,32 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: 'DM Serif Display', Georgia, serif;
+  }
+
+  .font-mono-brand {
+    font-family: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+  }
+
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }

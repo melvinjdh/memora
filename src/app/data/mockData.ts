@@ -3,6 +3,10 @@ export interface Museum {
   name: string;
   slug: string;
   heroImage: string;
+  imageCredit?: {
+  source: string;
+  url?: string;
+};
   description: string;
   history: string;
   location: string;
@@ -52,7 +56,12 @@ export interface TourGuide {
   rating: number;
   reviews: number;
   pricePerHour: number;
-  availability: string[];
+
+  availability: {
+    date: string;
+    slots: string[];
+  }[];
+
   gender: string;
   age: number;
   description: string;
@@ -78,6 +87,28 @@ function getUpcomingDates(offsets: number[]) {
   });
 }
 
+function generateAvailability(offsets: number[]) {
+  const defaultSlots = [
+    '09:00',
+    '10:30',
+    '13:00',
+    '14:30',
+    '16:00',
+  ];
+
+  const today = new Date();
+
+  return offsets.map((offset) => {
+    const nextDate = new Date(today);
+    nextDate.setDate(today.getDate() + offset);
+
+    return {
+      date: formatDateToLocal(nextDate),
+      slots: defaultSlots,
+    };
+  });
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -87,6 +118,11 @@ export interface Product {
   museum: string;
   description: string;
   stock: number;
+
+  source?: 'museum' | 'local';
+  merchType?: string;
+  tags?: string[];
+  featured?: boolean;
 }
 
 export interface Order {
@@ -117,7 +153,11 @@ export const museums: Museum[] = [
   id: '1',
   name: 'Museum Sepuluh Nopember',
   slug: 'museum-sepuluh-nopember',
-  heroImage: '',
+  heroImage: '/images/museum_sepuluh_nopember.jpg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Museum perjuangan yang mengenang heroisme Pertempuran 10 November 1945 di Surabaya.',
   history: 'Berada tepat di bawah kawasan Tugu Pahlawan, museum ini menyimpan memori heroik Pertempuran 10 November 1945 melalui galeri foto dan video perang, diorama pertempuran, serta ruang audio visual yang menampilkan semangat perjuangan arek-arek Suroboyo.',
   location: 'Jl. Pahlawan, Alun-alun Contong, Kec. Bubutan, Surabaya, Jawa Timur 60174',
@@ -151,22 +191,26 @@ transportation: {
   },
   nearbyDining: [
     { name: 'Rawon Setan', type: 'Kuliner sekitar', distance: '1 km' },
-    { name: 'Pecel Sayur Pak Gendut', type: 'Kuliner sekitar', distance: '800 meter' },
+    { name: 'Pecel Sayur Pak Gendut', type: 'Kuliner sekitar', distance: '800 m' },
     { name: 'Depot Lamongan Pak Jo', type: 'Kuliner sekitar', distance: '1,5 km' }
   ],
   nearbyFacilities: [
-    { type: 'Stasiun', name: 'Stasiun Pasar Turi', distance: '800 meter' },
-    { type: 'Tempat Ibadah', name: 'Masjid Taqwa Tugu Pahlawan', distance: '150 meter' },
-    { type: 'SPBU', name: 'SPBU Pertamina Jl. Pahlawan', distance: '300 meter' },
-    { type: 'ATM', name: 'ATM Mandiri & BCA', distance: '100 meter' },
-    { type: 'Apotek', name: 'Apotek K24', distance: '400 meter' }
+    { type: 'Stasiun', name: 'Stasiun Pasar Turi', distance: '800 m' },
+    { type: 'Tempat Ibadah', name: 'Masjid Taqwa Tugu Pahlawan', distance: '150 m' },
+    { type: 'SPBU', name: 'SPBU Pertamina Jl. Pahlawan', distance: '300 m' },
+    { type: 'ATM', name: 'ATM Mandiri & BCA', distance: '100 m' },
+    { type: 'Apotek', name: 'Apotek K24', distance: '400 m' }
   ]
 },
   {
   id: '2',
   name: 'Museum Surabaya (Siola)',
   slug: 'museum-surabaya-siola',
-  heroImage: '',
+  heroImage: '/images/Museum_Surabaya_Siola.jpg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Museum kota yang menampilkan perjalanan sejarah, sosial, dan budaya Surabaya dari masa ke masa.',
   history: 'Terletak di gedung bersejarah Siola, museum ini menyajikan koleksi yang menggambarkan perkembangan Surabaya dari masa lampau hingga modern, lengkap dengan dokumentasi kota, benda bersejarah, serta narasi perkembangan sosial budaya Surabaya.',
   location: 'Jl. Tunjungan No.1, Genteng, Kec. Genteng, Surabaya, Jawa Timur 60275',
@@ -196,16 +240,16 @@ transportation: {
     privateVehicle: 'Akses kendaraan pribadi mudah dari pusat kota Surabaya dan tersedia area parkir.'
   },
   nearbyDining: [
-    { name: 'Kopi Tokoh', type: 'Kuliner sekitar', distance: '200 meter' },
-    { name: 'Rawon Gajah Mada', type: 'Kuliner sekitar', distance: '400 meter' },
-    { name: 'Es Tidar', type: 'Kuliner sekitar', distance: '300 meter' },
-    { name: 'Bakso Ibu Sadiyah', type: 'Kuliner sekitar', distance: '600 meter' }
+    { name: 'Kopi Tokoh', type: 'Kuliner sekitar', distance: '200 m' },
+    { name: 'Rawon Gajah Mada', type: 'Kuliner sekitar', distance: '400 m' },
+    { name: 'Es Tidar', type: 'Kuliner sekitar', distance: '300 m' },
+    { name: 'Bakso Ibu Sadiyah', type: 'Kuliner sekitar', distance: '600 m' }
   ],
   nearbyFacilities: [
-    { type: 'Pusat Belanja', name: 'Tunjungan Plaza Mall', distance: '200 meter' },
-    { type: 'Tempat Ibadah', name: 'Masjid Al-Muhajirin Tunjungan', distance: '300 meter' },
-    { type: 'SPBU', name: 'SPBU Shell', distance: '500 meter' },
-    { type: 'Halte', name: 'Halte Siola / MPP Siola A', distance: '100 meter' }
+    { type: 'Pusat Belanja', name: 'Tunjungan Plaza Mall', distance: '200 m' },
+    { type: 'Tempat Ibadah', name: 'Masjid Al-Muhajirin Tunjungan', distance: '300 m' },
+    { type: 'SPBU', name: 'SPBU Shell', distance: '500 m' },
+    { type: 'Halte', name: 'Halte Siola / MPP Siola A', distance: '100 m' }
   ]
 },
   {
@@ -213,6 +257,10 @@ transportation: {
   name: 'Museum H.O.S Tjokroaminoto',
   slug: 'museum-hos-tjokroaminoto',
   heroImage: '/images/museum_HOS_Cokroaminoto.jpg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Museum sejarah yang menempati rumah H.O.S. Tjokroaminoto, tokoh penting pergerakan nasional Indonesia.',
   history: 'Museum ini berada di rumah bersejarah tempat H.O.S. Tjokroaminoto tinggal bersama keluarganya. Tempat ini juga dikenal sebagai ruang tumbuh gagasan tokoh-tokoh besar bangsa, termasuk Soekarno muda.',
   location: 'Jl. Peneleh Gg. VII No.29-31, Peneleh, Kec. Genteng, Surabaya, Jawa Timur 60274',
@@ -243,23 +291,27 @@ transportation: {
     privateVehicle: 'Dapat diakses kendaraan pribadi melalui kawasan Peneleh, dengan parkir menyesuaikan area sekitar museum.'
   },
   nearbyDining: [
-    { name: 'Rawon Dapur', type: 'Kuliner sekitar', distance: '500 meter' },
-    { name: 'Pecel Pak Kumis', type: 'Kuliner sekitar', distance: '400 meter' },
-    { name: 'Es Campur Mbok Giyem', type: 'Kuliner sekitar', distance: '300 meter' },
-    { name: 'Soto Ayam Pak Gendut', type: 'Kuliner sekitar', distance: '700 meter' }
+    { name: 'Rawon Dapur', type: 'Kuliner sekitar', distance: '500 m' },
+    { name: 'Pecel Pak Kumis', type: 'Kuliner sekitar', distance: '400 m' },
+    { name: 'Es Campur Mbok Giyem', type: 'Kuliner sekitar', distance: '300 m' },
+    { name: 'Soto Ayam Pak Gendut', type: 'Kuliner sekitar', distance: '700 m' }
   ],
   nearbyFacilities: [
-    { type: 'Halte', name: 'Halte Alun-alun Contong', distance: '300 meter' },
-    { type: 'Tempat Ibadah', name: 'Masjid Jami’ Peneleh', distance: '200 meter' },
-    { type: 'Apotek', name: 'Apotek Kimia Farma Peneleh', distance: '400 meter' },
-    { type: 'SPBU', name: 'SPBU Pertamina', distance: '800 meter' }
+    { type: 'Halte', name: 'Halte Alun-alun Contong', distance: '300 m' },
+    { type: 'Tempat Ibadah', name: 'Masjid Jami’ Peneleh', distance: '200 m' },
+    { type: 'Apotek', name: 'Apotek Kimia Farma Peneleh', distance: '400 m' },
+    { type: 'SPBU', name: 'SPBU Pertamina', distance: '800 m' }
   ]
 },
   {
   id: '4',
   name: 'Museum Olahraga Surabaya',
   slug: 'museum-olahraga-surabaya',
-  heroImage: '',
+  heroImage: '/images/Museum_Olahraga_Surabaya.jpg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Museum yang menampilkan sejarah dan prestasi olahraga Surabaya dari berbagai cabang.',
   history: 'Museum ini menampilkan koleksi historika olahraga Surabaya seperti medali, trofi, jersey, dan berbagai artefak prestasi atlet. Ruang interaktif di lantai 1 dan 2 menambah pengalaman edukatif pengunjung.',
   location: 'Jl. Indragiri, Darmo, Kec. Wonokromo, Surabaya, Jawa Timur 60241',
@@ -290,22 +342,26 @@ transportation: {
     privateVehicle: 'Akses kendaraan pribadi tersedia melalui kawasan THOR dan Gelora Pancasila, dengan area parkir museum.'
   },
   nearbyDining: [
-    { name: 'Ayam Goreng Suharti', type: 'Kuliner sekitar', distance: '400 meter' },
-    { name: 'Bakso Pak Kumis THOR', type: 'Kuliner sekitar', distance: '200 meter' },
-    { name: 'Es Campur Pak Tono', type: 'Kuliner sekitar', distance: '500 meter' }
+    { name: 'Ayam Goreng Suharti', type: 'Kuliner sekitar', distance: '400 m' },
+    { name: 'Bakso Pak Kumis THOR', type: 'Kuliner sekitar', distance: '200 m' },
+    { name: 'Es Campur Pak Tono', type: 'Kuliner sekitar', distance: '500 m' }
   ],
   nearbyFacilities: [
-    { type: 'Lapangan', name: 'Lapangan THOR', distance: '200 meter' },
-    { type: 'Tempat Ibadah', name: 'Masjid Al-Ikhlas Indragiri', distance: '300 meter' },
-    { type: 'SPBU', name: 'SPBU Pertamina', distance: '700 meter' },
-    { type: 'ATM', name: 'ATM BNI & BCA', distance: '150 meter' }
+    { type: 'Lapangan', name: 'Lapangan THOR', distance: '200 m' },
+    { type: 'Tempat Ibadah', name: 'Masjid Al-Ikhlas Indragiri', distance: '300 m' },
+    { type: 'SPBU', name: 'SPBU Pertamina', distance: '700 m' },
+    { type: 'ATM', name: 'ATM BNI & BCA', distance: '150 m' }
   ]
 },
   {
   id: '5',
   name: 'Rumah Lahir Bung Karno',
   slug: 'rumah-lahir-bung-karno',
-  heroImage: '',
+  heroImage: '/images/rumah_lahir_bung_karno.jpeg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Rumah bersejarah tempat lahir Presiden pertama Republik Indonesia, Ir. Soekarno.',
   history: 'Rumah sederhana ini menjadi saksi bisu tempat lahirnya Ir. Soekarno. Museum ini menampilkan perjalanan keluarga Soekarno melalui video mapping dan teknologi AR yang memperkaya pengalaman edukatif pengunjung.',
   location: 'Jl. Pandean IV No.40, Peneleh, Kec. Genteng, Surabaya, Jawa Timur 60274',
@@ -351,7 +407,11 @@ transportation: {
   id: '6',
   name: 'Museum Dr. Soetomo',
   slug: 'museum-dr-soetomo',
-  heroImage: '',
+  heroImage: '/images/museum_d.r_soetomo.jpg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Museum yang didedikasikan untuk mengenang perjuangan dan pemikiran Dr. Soetomo.',
   history: 'Museum ini menghadirkan kisah perjuangan Dr. Soetomo melalui galeri foto, lebih dari 300 artefak media, serta replika ruang praktik dokter yang menggambarkan kiprah beliau dalam dunia kebangsaan dan kesehatan.',
   location: 'Jl. Bubutan No.85-87, Bubutan, Kec. Bubutan, Surabaya, Jawa Timur 60174',
@@ -403,7 +463,11 @@ transportation: {
   id: '7',
   name: 'Museum W.R. Soepratman',
   slug: 'museum-wr-soepratman',
-  heroImage: '',
+  heroImage: '/images/museum_w.r._soepratman.jpg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Museum yang mengenang pencipta lagu kebangsaan Indonesia Raya, W.R. Soepratman.',
   history: 'Museum ini menampilkan ruang tamu keluarga W.R. Soepratman, replika biola, dan ruang rahasia anti-kolonial yang memperlihatkan semangat perjuangan melalui musik dan gagasan kebangsaan.',
   location: 'Jl. Mangga No.21, Tambaksari, Kec. Tambaksari, Surabaya, Jawa Timur 60136',
@@ -451,7 +515,11 @@ transportation: {
   id: '8',
   name: 'Museum Pendidikan Surabaya',
   slug: 'museum-pendidikan-surabaya',
-  heroImage: '',
+  heroImage: '/images/museum_pendidikan_surabaya.jpg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Museum edukatif yang menampilkan perkembangan sistem pendidikan di Indonesia.',
   history: 'Museum ini menghadirkan diorama replika kelas dari empat periode sejarah pendidikan, mulai dari masa pra-aksara hingga kemerdekaan, lengkap dengan ruang terbuka edukatif dan fasilitas ramah keluarga.',
   location: 'Jl. Genteng Kali No.10, Genteng, Kec. Genteng, Surabaya, Jawa Timur 60275',
@@ -501,7 +569,11 @@ transportation: {
     id: '9',
     name: 'Museum Bank Indonesia Surabaya',
     slug: 'museum-bank-indonesia-surabaya',
-    heroImage: '',
+    heroImage: '/images/museum_bank_bi.jpg',
+	imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
     description: 'Museum yang menampilkan sejarah perbankan dan sistem keuangan di Indonesia.',
     history: 'Bekas gedung bank sentral Hindia Belanda yang megah. Pengunjung diajak menelusuri sejarah perbankan, melihat mesin pencetak uang kuno, hingga masuk langsung ke area brankas.',
     location: 'Jl. Garuda No.1, Krembangan Sel., Kec. Krembangan, Surabaya, Jawa Timur 60175',
@@ -516,7 +588,7 @@ transportation: {
     facilities: ['Galeri edukasi', 'Area pamer', 'Toilet', 'Area parkir', 'Belum diinput'],
     transportation: {
       publicTransport: ['Belum diinput'],
-      ridehailing: 'Tersedia',
+      ridehailing: 'Tersedia melalui aplikasi GOJEK, GRAB, Maxim, MyBluebird, dan Green SM.',
       privateVehicle: 'Akses kendaraan pribadi tersedia'
     },
     nearbyDining: [
@@ -531,7 +603,12 @@ transportation: {
     id: '10',
     name: 'House of Sampoerna',
     slug: 'house-of-sampoerna',
-    heroImage: '',
+	isOpen: false,
+    heroImage: '/images/house_of_sampoerna.jpg',
+	imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
     description: 'Museum tembakau dan sejarah industri kretek yang berada di bangunan kolonial ikonik Surabaya.',
     history: 'House of Sampoerna adalah museum tembakau dengan gaya arsitektur kolonial Belanda yang dibangun pada tahun 1862. Museum ini menampilkan sejarah awal industri kretek di Indonesia, koleksi keluarga Sampoerna, serta proses produksi tradisional.',
     location: 'Taman Jl. Sampoerna No.6, Krembangan Utara, Kec. Pabean Cantian, Surabaya, Jawa Timur 60163',
@@ -545,7 +622,7 @@ transportation: {
     facilities: ['Museum gallery', 'Souvenir shop', 'Kafe', 'Toilet', 'Area parkir'],
     transportation: {
       publicTransport: ['Belum diinput'],
-      ridehailing: 'Tersedia - cari "House of Sampoerna"',
+      ridehailing: 'Tersedia melalui aplikasi GOJEK, GRAB, Maxim, MyBluebird, dan Green SM.',
       privateVehicle: 'Akses kendaraan pribadi tersedia'
     },
     nearbyDining: [
@@ -558,39 +635,14 @@ transportation: {
 
   {
     id: '11',
-    name: 'Museum Kesehatan Dr. Adhyatma, MPH',
-    slug: 'museum-kesehatan-dr-adhyatma',
-    heroImage: '',
-    description: 'Museum edukasi kesehatan yang menampilkan perkembangan dunia medis dan pengobatan tradisional.',
-    history: 'Museum ini dikenal unik karena tidak hanya menampilkan sejarah alat kesehatan modern, tetapi juga pengobatan tradisional, supranatural, dan benda-benda yang dikaitkan dengan praktik pengobatan masa lalu.',
-    location: 'Jl. Indrapura No.17, Kemayoran, Kec. Krembangan, Surabaya, Jawa Timur 60176',
-    mapEmbedUrl: '',
-    operatingHours: [
-      { day: 'Senin - Jumat', hours: '08:00 - 16:00' },
-      { day: 'Sabtu - Minggu', hours: 'Belum diinput' }
-    ],
-    tickets: [
-      { id: 't26', type: 'Umum', price: 1500, description: 'Pembelian tiket langsung di lokasi' }
-    ],
-    facilities: ['Galeri kesehatan', 'Toilet', 'Area edukasi', 'Belum diinput'],
-    transportation: {
-      publicTransport: ['Belum diinput'],
-      ridehailing: 'Tersedia',
-      privateVehicle: 'Akses kendaraan pribadi tersedia'
-    },
-    nearbyDining: [
-      { name: 'Belum diinput', type: 'Kuliner sekitar', distance: 'Belum diinput' }
-    ],
-    nearbyFacilities: [
-      { type: 'Apotek', name: 'Belum diinput', distance: 'Belum diinput' }
-    ]
-  },
-
-  {
-    id: '12',
     name: 'Museum Kanker Indonesia',
     slug: 'museum-kanker-indonesia',
-    heroImage: '',
+	isOpen: false,
+    heroImage: '/images/museum_kanker_indonesia.jpg',
+	imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
     description: 'Museum edukasi yang berfokus pada kanker, pencegahan, dan deteksi dini.',
     history: 'Museum ini menampilkan anatomi, spesimen sel kanker, dan informasi penting tentang pencegahan serta deteksi dini kanker. Cocok sebagai media edukasi kesehatan masyarakat.',
     location: 'Jl. Kayoon No.16-18, Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur 60271',
@@ -605,7 +657,7 @@ transportation: {
     facilities: ['Area edukasi', 'Toilet', 'Belum diinput'],
     transportation: {
       publicTransport: ['Belum diinput'],
-      ridehailing: 'Tersedia',
+      ridehailing: 'Tersedia melalui aplikasi GOJEK, GRAB, Maxim, MyBluebird, dan Green SM.',
       privateVehicle: 'Akses kendaraan pribadi tersedia'
     },
     nearbyDining: [
@@ -617,10 +669,14 @@ transportation: {
   },
 
   {
-    id: '13',
+    id: '12',
     name: 'Museum TNI Loka Jala Crana',
     slug: 'museum-tni-loka-jala-crana',
-    heroImage: '',
+    heroImage: '/images/museum_tni_al_loka.jpg',
+	imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
     description: 'Museum militer maritim yang menampilkan sejarah dan koleksi TNI Angkatan Laut.',
     history: 'Museum ini berada di kawasan Akademi Angkatan Laut (AAL) Bumimoro dan menyimpan koleksi sejarah pertempuran laut Nusantara, meriam, tank amfibi, serta berbagai sarana TNI AL.',
     location: 'Akademi TNI Angkatan Laut, Jl. Moro Krembangan, Bumimoro, Kec. Krembangan, Surabaya, Jawa Timur 60178',
@@ -635,7 +691,7 @@ transportation: {
     facilities: ['Galeri militer', 'Area edukasi', 'Toilet', 'Belum diinput'],
     transportation: {
       publicTransport: ['Belum diinput'],
-      ridehailing: 'Tersedia',
+      ridehailing: 'Tersedia melalui aplikasi GOJEK, GRAB, Maxim, MyBluebird, dan Green SM.',
       privateVehicle: 'Akses kendaraan pribadi tersedia'
     },
     nearbyDining: [
@@ -647,10 +703,14 @@ transportation: {
   },
 
   {
-  id: '14',
+  id: '13',
   name: 'Monumen Kapal Selam',
   slug: 'monumen-kapal-selam',
-  heroImage: '',
+  heroImage: '/images/monumen_kapal_selam.jpg',
+  imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
   description: 'Monumen dan museum kapal selam asli KRI Pasopati 410 yang pernah digunakan TNI AL.',
   history: 'Monumen Kapal Selam menampilkan pengalaman eksplorasi KRI Pasopati 410, lengkap dengan wahana video rama, area kolam renang, stand makanan, serta suasana wisata edukatif maritim di pusat kota Surabaya.',
   location: 'Jl. Pemuda No.39, Embong Kaliasin, Kec. Genteng, Surabaya, Jawa Timur 60271',
@@ -691,45 +751,20 @@ transportation: {
     { type: 'Ruang Publik', name: 'Alun-Alun Surabaya', distance: '650 meter' }
   ]
 },
+  
   {
-    id: '15',
-    name: 'De Mata Trick Eye Museum',
-    slug: 'de-mata-trick-eye-museum',
-    heroImage: '',
-    description: 'Museum seni ilusi optik dan foto 3D interaktif.',
-    history: 'Museum ini berisi berbagai koleksi seni ilusi optik 3D dengan tema olahraga, alam, binatang, angka, romansa, pahlawan, sirkus, dan lain-lain. Data lokasi pada dokumen menunjukkan alamat di luar Surabaya sehingga perlu dicek ulang sebelum final.',
-    location: 'Jl. Veteran No.150-151, Pandeyan, Umbulharjo, Kota Yogyakarta, Daerah Istimewa Yogyakarta 55161',
-    mapEmbedUrl: '',
-    operatingHours: [
-      { day: 'Senin - Minggu', hours: '10:00 - 22:00' }
-    ],
-    tickets: [
-      { id: 't31', type: 'Senin - Kamis', price: 25000, description: 'Tiket weekday' },
-      { id: 't32', type: 'Jumat - Minggu', price: 35000, description: 'Tiket weekend' }
-    ],
-    facilities: ['Spot foto 3D', 'Toilet', 'Belum diinput'],
-    transportation: {
-      publicTransport: ['Belum diinput'],
-      ridehailing: 'Tersedia',
-      privateVehicle: 'Belum diinput'
-    },
-    nearbyDining: [
-      { name: 'Belum diinput', type: 'Kuliner sekitar', distance: 'Belum diinput' }
-    ],
-    nearbyFacilities: [
-      { type: 'Catatan', name: 'Perlu verifikasi apakah museum ini akan tetap dipakai di project', distance: '-' }
-    ]
-  },
-
-  {
-    id: '16',
+    id: '14',
     name: 'Monumen Jalesveva Jayamahe',
     slug: 'monumen-jalesveva-jayamahe',
-    heroImage: '',
+    heroImage: '/images/Monumen_Jalesveva_Jayamahe.jpeg',
+	imageCredit: {
+  source: 'Google Images',
+  url: 'https://images.google.com'
+},
     description: 'Monumen maritim ikonik Surabaya yang menjadi simbol kejayaan armada laut Indonesia.',
     history: 'Ikon maritim Surabaya berupa patung raksasa Perwira TNI AL setinggi sekitar 30 meter yang menghadap laut di kawasan ujung Pelabuhan Tanjung Perak. Menjadi simbol kekuatan dan kejayaan maritim Indonesia.',
-    location: 'Armada Timur Ujung, Ujung, Kec. Semampir, Kota Surabaya, Jawa Timur',
-    mapEmbedUrl: '',
+    location: 'Koarmada II Jl. Raya Hangtuah, Ujung, Kec. Semampir, Surabaya, Jawa Timur',
+    mapEmbedUrl: 'https://maps.app.goo.gl/CU5yGAp7s1G8DsR79',
     operatingHours: [
       { day: 'Senin - Jumat', hours: '08:00 - 18:00' },
       { day: 'Sabtu - Minggu', hours: 'Belum diinput' }
@@ -737,10 +772,12 @@ transportation: {
     tickets: [
       { id: 't33', type: 'Tiket Masuk', price: 0, description: 'Gratis untuk semua pengunjung' }
     ],
-    facilities: ['Area landmark', 'Belum diinput'],
+    facilities: ['Toilet umum', 'Parkir Luas','Kantin','Gedung Teater & Hangga'],
     transportation: {
-      publicTransport: ['Belum diinput'],
-      ridehailing: 'Tersedia',
+      publicTransport: [
+	  'Bus rute R1/R2',
+      'WaraWiri rute FD01 dan FD07'],
+	  ridehailing: 'Tersedia melalui aplikasi GOJEK, GRAB, Maxim, MyBluebird, dan Green SM.',
       privateVehicle: 'Akses kendaraan pribadi tersedia'
     },
     nearbyDining: [
@@ -764,7 +801,7 @@ export const tourGuides: TourGuide[] = [
     rating: 4.9,
     reviews: 48,
     pricePerHour: 125000,
-    availability: getUpcomingDates([0, 1, 2, 4, 6, 8]),
+    availability: generateAvailability([0, 1, 2, 4, 6, 8]),
     gender: 'Laki-laki',
     age: 34,
     description:
@@ -804,7 +841,7 @@ export const tourGuides: TourGuide[] = [
     rating: 4.8,
     reviews: 41,
     pricePerHour: 120000,
-    availability: getUpcomingDates([0, 2, 3, 5, 7, 9]),
+    availability: generateAvailability([0, 2, 3, 5, 7, 9]),
     gender: 'Perempuan',
     age: 29,
     description:
@@ -844,7 +881,7 @@ export const tourGuides: TourGuide[] = [
     rating: 4.9,
     reviews: 56,
     pricePerHour: 140000,
-    availability: getUpcomingDates([1, 2, 4, 6, 8, 10]),
+    availability: generateAvailability([0, 2, 3, 5, 7, 9]),
     gender: 'Laki-laki',
     age: 52,
     description:
@@ -884,7 +921,7 @@ export const tourGuides: TourGuide[] = [
     rating: 4.8,
     reviews: 37,
     pricePerHour: 130000,
-    availability: getUpcomingDates([0, 1, 3, 5, 7, 10]),
+    availability: generateAvailability([0, 2, 3, 5, 7, 9]),
     gender: 'Perempuan',
     age: 27,
     description:
@@ -924,7 +961,7 @@ export const tourGuides: TourGuide[] = [
     rating: 4.9,
     reviews: 44,
     pricePerHour: 135000,
-    availability: getUpcomingDates([0, 2, 4, 5, 7, 9]),
+    availability: generateAvailability([0, 2, 3, 5, 7, 9]),
     gender: 'Laki-laki',
     age: 41,
     description:
@@ -959,46 +996,254 @@ export const tourGuides: TourGuide[] = [
 
 
 export const products: Product[] = [
+
+  // ======================
+  // HOUSE OF SAMPOERNA
+  // ======================
+
   {
-    id: 'p1',
-    name: 'Kaos Museum',
-    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop',
-    price: 85000,
-    category: 'Pakaian',
-    museum: 'Museum House of Sampoerna',
-    description: 'Merchandise museum belum diinput secara lengkap.',
-    stock: 20
+    id: 'hos-1',
+    name: 'Miniatur Alat Pelinting Rokok',
+    image: '/images/alat_pelinting_rokok.jpg',
+    price: 125000,
+    category: 'Koleksi',
+    museum: 'House of Sampoerna',
+    description: 'Miniatur alat pelinting rokok tradisional yang digunakan dalam produksi kretek.',
+    stock: 12,
+    source: 'museum',
+    featured: true
   },
+
   {
-    id: 'p2',
-    name: 'Totebag Museum',
-    image: 'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=500&h=500&fit=crop',
+    id: 'hos-2',
+    name: 'Buku Sejarah House of Sampoerna',
+    image: '/images/buku_sejarah_hos.jpg',
+    price: 90000,
+    category: 'Buku',
+    museum: 'House of Sampoerna',
+    description: 'Buku yang menceritakan sejarah dan perkembangan House of Sampoerna.',
+    stock: 15,
+    source: 'museum'
+  },
+
+  {
+    id: 'hos-3',
+    name: 'Kemeja House of Sampoerna',
+    image: '/images/no_preview.jpg',
+    price: 180000,
+    category: 'Pakaian',
+    museum: 'House of Sampoerna',
+    description: 'Kemeja eksklusif dengan identitas House of Sampoerna.',
+    stock: 10,
+    source: 'museum'
+  },
+
+  {
+    id: 'hos-4',
+    name: 'Paket Souvenir Cengkeh',
+    image: '/images/souvenir_cengkeh.jpg',
+    price: 45000,
+    category: 'Suvenir',
+    museum: 'House of Sampoerna',
+    description: 'Paket souvenir edukatif bertema bahan baku kretek.',
+    stock: 20,
+    source: 'museum'
+  },
+
+  // ======================
+  // MUSEUM SIOLA
+  // ======================
+
+  {
+    id: 'siola-1',
+    name: 'Kaos Surabaya City of Heroes',
+    image: '/images/kaos_surabaya.jpeg',
+	imageSource: 'shopee.co',
+    price: 95000,
+    category: 'Pakaian',
+    museum: 'Museum Siola',
+    description: 'Kaos bertema ikon budaya dan sejarah Kota Surabaya.',
+    stock: 20,
+    source: 'museum',
+    featured: true
+  },
+
+  {
+    id: 'siola-2',
+    name: 'Tote Bag Surabaya',
+    image: '/images/no_preview.jpg',
+	imageSource: 'Google Photos',
     price: 65000,
     category: 'Aksesori',
-    museum: 'Monumen Kapal Selam',
-    description: 'Merchandise museum belum diinput secara lengkap.',
-    stock: 15
+    museum: 'Museum Siola',
+    description: 'Tas kanvas dengan ilustrasi bangunan bersejarah Surabaya.',
+    stock: 25,
+    source: 'museum'
   },
+
   {
-    id: 'p3',
-    name: 'Mug Edisi Museum',
-    image: 'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=500&h=500&fit=crop',
-    price: 50000,
-    category: 'Peralatan Minum',
+    id: 'siola-3',
+    name: 'Sambal Udang Khas Surabaya',
+    image: '/images/no_preview.jpg',
+	imageSource: 'Google Photos',
+    price: 35000,
+    category: 'Kuliner',
+    museum: 'Museum Siola',
+    description: 'Produk kuliner UMKM khas Surabaya.',
+    stock: 30,
+    source: 'museum'
+  },
+
+  {
+    id: 'siola-4',
+    name: 'Keripik Buah Lokal',
+    image: '/images/no_preview.jpg',
+	imageSource: 'Google Photos',
+    price: 28000,
+    category: 'Kuliner',
+    museum: 'Museum Siola',
+    description: 'Camilan khas UMKM Jawa Timur.',
+    stock: 40,
+    source: 'museum'
+  },
+
+  // ======================
+  // MUSEUM SEPULUH NOPEMBER
+  // ======================
+
+  {
+    id: 'm10-1',
+    name: 'Kaos Museum Sepuluh Nopember',
+    image: '/images/no_preview.jpg',
+	imageSource: 'Google Photos',
+    price: 85000,
+    category: 'Pakaian',
     museum: 'Museum Sepuluh Nopember',
-    description: 'Merchandise museum belum diinput secara lengkap.',
-    stock: 30
+    description: 'Kaos eksklusif bertema perjuangan Surabaya.',
+    stock: 25,
+    source: 'museum',
+    featured: true
   },
+
   {
-    id: 'p4',
-    name: 'Buku Koleksi Museum',
-    image: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=500&h=500&fit=crop',
-    price: 120000,
+    id: 'm10-2',
+    name: 'Replika British Brodie Helmet',
+    image: '/images/helmet.png',
+	imageSource: 'Roodebrug Soerabaia Gift Shop',
+    price: 450000,
+    category: 'Koleksi',
+    museum: 'Museum Sepuluh Nopember',
+    description: 'Replika helm pasukan Inggris era Pertempuran Surabaya.',
+    stock: 8,
+    source: 'museum',
+    featured: true
+  },
+
+  {
+    id: 'm10-3',
+    name: 'Miniatur Pesawat Tempur',
+    image: '/images/pesawat tempur.png',
+	imageSource: 'Roodebrug Soerabaia Gift Shop',
+    price: 150000,
+    category: 'Miniatur',
+    museum: 'Museum Sepuluh Nopember',
+    description: 'Miniatur pesawat tempur koleksi sejarah Indonesia.',
+    stock: 10,
+    source: 'museum'
+  },
+
+  {
+    id: 'm10-4',
+    name: 'Buku Sejarah Pertempuran Surabaya',
+    image: '/images/no_preview.jpg',
+	imageSource: 'Google Photos',
+    price: 95000,
     category: 'Buku',
-    museum: 'Museum Mpu Tantular',
-    description: 'Merchandise museum belum diinput secara lengkap.',
-    stock: 12
-  }
+    museum: 'Museum Sepuluh Nopember',
+    description: 'Buku sejarah perjuangan rakyat Surabaya pada 10 November 1945.',
+    stock: 20,
+    source: 'museum'
+  },
+  
+// ======================
+// PRODUK LOKAL / KOLABORASI
+// ======================
+
+{
+  id: 'local-beverage-1',
+  name: 'Tjokro Coffe Brown Sugar',
+  image: '/images/produk_tjokrobs.png',
+  imageSource: 'tjokrocoffe',
+  price: 15000,
+  category: 'Kuliner',
+  museum: 'Produk Lokal Surabaya',
+  description: 'Kopi lokal premium dengan karakter rasa yang dalam, aroma yang lembut, dan sentuhan khas Nusantara. Setiap seduhan menghadirkan pengalaman yang hangat, tenang, dan berkesan—seperti membawa pulang sebagian kecil cerita budaya dari perjalananmu.',
+  stock: 28,
+  source: 'local',
+  merchType: 'Kuliner',
+  tags: ['Produk Lokal', 'Minuman', 'Kopi'],
+  featured: true
+},
+{
+  id: 'local-beverage-2',
+  name: 'Tjokro Coffe Original',
+  image: '/images/produk_tjokroori.png',
+  imageSource: 'tjokrocoffe',
+  price: 10000,
+  category: 'Kopi & Minuman',
+  museum: 'Produk Lokal Surabaya',
+  description: 'Kopi lokal dengan karakter aroma hangat dan kemasan premium.',
+  stock: 24,
+  source: 'local',
+  merchType: 'Kopi & Minuman',
+  tags: ['Produk Lokal', 'Kopi', 'Minuman'],
+  featured: true
+},
+{
+  id: 'local-beverage-3',
+  name: 'Tjokro Coffe Rempah',
+  image: '/images/produk_tjokrorempah.png',
+  imageSource: 'tjokrocoffe',
+  price: 13000,
+  category: 'Kopi & Minuman',
+  museum: 'Produk Lokal Surabaya',
+  description: 'Kopi Rempah lokal dengan karakter aroma hangat dan kemasan premium.',
+  stock: 24,
+  source: 'local',
+  merchType: 'Kopi & Minuman',
+  tags: ['Produk Lokal', 'Kopi', 'Minuman'],
+  featured: true
+},
+{
+  id: 'local-accessory-1',
+  name: 'Blind Pouch Suraboo',
+  image: '/images/produk_suraboo.jpeg',
+  imageSource: 'suraboo.id',
+  price: 22000,
+  category: 'Aksesori',
+  museum: 'Produk Lokal Surabaya',
+  description: 'Gantungan kunci exclusive yang bisa kamu temukan dalam blind pouch',
+  stock: 35,
+  source: 'local',
+  merchType: 'Aksesori',
+  tags: ['Produk Lokal', 'Aksesori'],
+  featured: false
+},
+{
+  id: 'local-fashion-1',
+  name: 'Kaos Line Art Kota Lama',
+  image: '/images/no_preview.jpg',
+  imageSource: 'Unsplash',
+  price: 98000,
+  category: 'Fashion',
+  museum: 'Produk Lokal Surabaya',
+  description: 'Kaos minimal dengan ilustrasi line art kawasan heritage Surabaya.',
+  stock: 18,
+  source: 'local',
+  merchType: 'Fashion',
+  tags: ['Produk Lokal', 'Fashion', 'Kaos'],
+  featured: false
+},
 ];
 
 export const mockUser: User = {
