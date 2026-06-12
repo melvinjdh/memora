@@ -96,28 +96,40 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Only track idle session if user is logged in
     if (!user) return;
 
-    let timeoutId: NodeJS.Timeout;
+    let checkIntervalId: NodeJS.Timeout;
     const IDLE_TIMEOUT = 15 * 60 * 1000; // 15 minutes
 
-    const handleIdleTimeout = () => {
-      supabase.auth.signOut().then(() => {
-        setUser(null);
-        toast.error('Sesi masuk telah berakhir karena tidak ada aktivitas. Silakan login kembali.', { duration: 8000 });
-      });
+    const checkIdle = () => {
+      const lastActivityStr = localStorage.getItem('lastActivity');
+      if (lastActivityStr) {
+        const lastActivity = parseInt(lastActivityStr, 10);
+        if (Date.now() - lastActivity > IDLE_TIMEOUT) {
+          supabase.auth.signOut().then(() => {
+            setUser(null);
+            localStorage.removeItem('lastActivity');
+            toast.error('Sesi masuk telah berakhir karena tidak ada aktivitas. Silakan login kembali.', { duration: 8000 });
+          });
+        }
+      }
     };
 
-    const resetTimer = () => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(handleIdleTimeout, IDLE_TIMEOUT);
+    const updateActivity = () => {
+      localStorage.setItem('lastActivity', Date.now().toString());
     };
+
+    // Initial check and update
+    checkIdle();
+    updateActivity();
+
+    // Check every 10 seconds
+    checkIntervalId = setInterval(checkIdle, 10000);
 
     const events = ['mousemove', 'keydown', 'scroll', 'click', 'touchstart'];
-    events.forEach(event => window.addEventListener(event, resetTimer));
-    resetTimer(); // Initialize timer
+    events.forEach(event => window.addEventListener(event, updateActivity));
 
     return () => {
-      clearTimeout(timeoutId);
-      events.forEach(event => window.removeEventListener(event, resetTimer));
+      clearInterval(checkIntervalId);
+      events.forEach(event => window.removeEventListener(event, updateActivity));
     };
   }, [user]);
 
