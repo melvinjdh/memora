@@ -57,10 +57,10 @@ export const AdminDashboardPage: React.FC = () => {
   ];
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-[#0a1f1a] p-8 text-[#f0ebe3]">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Dashboard Overview</h1>
-        <p className="text-muted-foreground">Welcome to Memora Admin Panel</p>
+        <h1 className="text-4xl font-bold tracking-tight text-[#c9ad6e] mb-2" style={{ fontFamily: "'ArtsyHeading', serif" }}>Dashboard Overview</h1>
+        <p className="text-[#a09a90] text-lg">Welcome to Memora Admin Panel</p>
       </div>
 
       {/* Stats Grid */}
@@ -68,17 +68,17 @@ export const AdminDashboardPage: React.FC = () => {
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.title}>
+            <Card key={stat.title} className="border-[#b59a5b]/20 bg-[#0d2b23] shadow-lg">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-sm text-muted-foreground">{stat.title}</p>
-                  <div className={`p-2 rounded-full bg-muted ${stat.color}`}>
+                  <p className="text-sm text-[#a09a90]">{stat.title}</p>
+                  <div className="p-2 rounded-full bg-[#1a4d3e]/50 text-[#c9ad6e] border border-[#b59a5b]/20">
                     <Icon className="h-4 w-4" />
                   </div>
                 </div>
                 <div className="flex items-end justify-between">
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <div className="flex items-center text-xs text-green-600">
+                  <p className="text-2xl font-bold text-[#f0ebe3]">{stat.value}</p>
+                  <div className="flex items-center text-xs text-emerald-400">
                     <TrendingUp className="h-3 w-3 mr-1" />
                     <span>{stat.change}</span>
                   </div>
@@ -91,35 +91,35 @@ export const AdminDashboardPage: React.FC = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border-[#b59a5b]/20 bg-[#0d2b23] shadow-lg">
           <CardHeader>
-            <CardTitle>Revenue Trend</CardTitle>
+            <CardTitle className="text-[#c9ad6e]">Revenue Trend</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={salesData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value: any) => `Rp ${value.toLocaleString('id-ID')}`} />
-                <Line type="monotone" dataKey="sales" stroke="#047857" strokeWidth={2} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#b59a5b" opacity={0.1} />
+                <XAxis dataKey="month" stroke="#a09a90" />
+                <YAxis stroke="#a09a90" />
+                <Tooltip contentStyle={{ backgroundColor: '#0a1f1a', borderColor: '#b59a5b' }} itemStyle={{ color: '#c9ad6e' }} />
+                <Line type="monotone" dataKey="sales" stroke="#b59a5b" strokeWidth={3} />
               </LineChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-[#b59a5b]/20 bg-[#0d2b23] shadow-lg">
           <CardHeader>
-            <CardTitle>Ticket Sales by Museum</CardTitle>
+            <CardTitle className="text-[#c9ad6e]">Tickets by Museum</CardTitle>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={ticketSalesData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="museum" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="tickets" fill="#10b981" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#b59a5b" opacity={0.1} />
+                <XAxis dataKey="museum" stroke="#a09a90" />
+                <YAxis stroke="#a09a90" />
+                <Tooltip contentStyle={{ backgroundColor: '#0a1f1a', borderColor: '#b59a5b' }} itemStyle={{ color: '#c9ad6e' }} />
+                <Bar dataKey="tickets" fill="#b59a5b" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
