@@ -52,11 +52,6 @@ export const Footer: React.FC = () => {
                   Book Tour Guide
                 </Link>
               </li>
-              <li>
-                <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                  My Dashboard
-                </Link>
-              </li>
             </ul>
           </div>
 

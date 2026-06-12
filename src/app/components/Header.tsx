@@ -37,7 +37,6 @@ export const Header: React.FC = () => {
   ];
 
   const accountLinks = [
-    { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'Pesanan Saya', path: '/my-orders', icon: ReceiptText },
     { label: 'Profil', path: '/profile', icon: User },
   ];

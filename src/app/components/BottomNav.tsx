@@ -6,7 +6,7 @@ const navItems = [
   { label: 'Beranda', to: '/', icon: Home, match: ['/'] },
   { label: 'Explore', to: '/museums', icon: Compass, match: ['/museums', '/tour-guides', '/merchandise'] },
   { label: 'Pesanan', to: '/my-orders', icon: ReceiptText, match: ['/my-orders', '/my-tickets', '/order-confirmation'] },
-  { label: 'Profil', to: '/profile', icon: UserRound, match: ['/profile', '/dashboard', '/login', '/register'] },
+  { label: 'Profil', to: '/profile', icon: UserRound, match: ['/profile', '/login', '/register'] },
 ];
 
 function isActive(pathname: string, item: (typeof navItems)[number]) {
