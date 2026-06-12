@@ -172,6 +172,7 @@ export const OrderConfirmationPage: React.FC = () => {
 
   const hasMerchandise = order.items?.some((item: any) => item.type === 'merchandise');
   const hasGuide = order.items?.some((item: any) => item.type === 'guide');
+  const guideItem = order.items?.find((item: any) => item.type === 'guide');
   const hasTicket = order.items?.some((item: any) => item.type === 'ticket');
 
   return (
