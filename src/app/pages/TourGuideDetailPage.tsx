@@ -34,6 +34,9 @@ export const TourGuideDetailPage: React.FC = () => {
   const [showCalendar, setShowCalendar] = useState(false);
   const [bookedHours, setBookedHours] = useState<number[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [museumHours, setMuseumHours] = useState<{ open: number; close: number } | null>(null);
+  const [museumClosed, setMuseumClosed] = useState(false);
+  const [loadingMuseumHours, setLoadingMuseumHours] = useState(false);
 
   // Entrance: slide-up dari bawah saat halaman dibuka
   const [entered, setEntered] = useState(false);
@@ -88,6 +91,107 @@ export const TourGuideDetailPage: React.FC = () => {
       fetchGuideDetail();
     }
   }, [id]);
+
+  // HELPER: Parse string jam operasional "08:00 - 15:00 WIB" → { open: 8, close: 15 }
+  const parseHoursString = (hoursStr: string): { open: number; close: number } | null => {
+    if (!hoursStr || hoursStr.toLowerCase().includes('tutup')) return null;
+    const match = hoursStr.match(/(\d{1,2})[:.]?(\d{2})?\s*[-–]\s*(\d{1,2})[:.]?(\d{2})?/);
+    if (!match) return null;
+    return { open: parseInt(match[1]), close: parseInt(match[3]) };
+  };
+
+  // HELPER: Cek apakah hari cocok dengan string hari operasional
+  const isDayMatch = (dayStr: string, date: Date): boolean => {
+    const dayNames = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    const dayName = dayNames[date.getDay()];
+    const lower = dayStr.toLowerCase();
+
+    // Cek exact match
+    if (lower.includes(dayName.toLowerCase())) return true;
+
+    // Cek range "Selasa - Minggu"
+    const rangeMatch = dayStr.match(/(\w+)\s*[-–]\s*(\w+)/);
+    if (rangeMatch) {
+      const startIdx = dayNames.findIndex(d => d.toLowerCase() === rangeMatch[1].toLowerCase());
+      const endIdx = dayNames.findIndex(d => d.toLowerCase() === rangeMatch[2].toLowerCase());
+      const currentIdx = date.getDay();
+      if (startIdx !== -1 && endIdx !== -1) {
+        if (startIdx <= endIdx) {
+          return currentIdx >= startIdx && currentIdx <= endIdx;
+        } else {
+          return currentIdx >= startIdx || currentIdx <= endIdx;
+        }
+      }
+    }
+
+    // "Setiap hari" atau "Setiap Hari"
+    if (lower.includes('setiap hari')) return true;
+
+    return false;
+  };
+
+  // FETCH JAM OPERASIONAL MUSEUM DARI SUPABASE
+  const fetchMuseumHours = useCallback(async (museumName: string) => {
+    if (!museumName || !bookingDate) {
+      setMuseumHours(null);
+      setMuseumClosed(false);
+      return;
+    }
+    setLoadingMuseumHours(true);
+    try {
+      const { data, error } = await supabase
+        .from('museums')
+        .select('operating_hours')
+        .eq('name', museumName)
+        .single();
+
+      if (error || !data?.operating_hours) {
+        // Fallback: jika museum tidak ditemukan, gunakan jam default
+        setMuseumHours({ open: 8, close: 17 });
+        setMuseumClosed(false);
+        return;
+      }
+
+      // Cari jadwal yang cocok untuk hari yang dipilih
+      const schedules = data.operating_hours as Array<{ day: string; hours: string }>;
+      let matched = false;
+
+      for (const schedule of schedules) {
+        if (isDayMatch(schedule.day, bookingDate)) {
+          const parsed = parseHoursString(schedule.hours);
+          if (parsed) {
+            setMuseumHours(parsed);
+            setMuseumClosed(false);
+          } else {
+            // "Tutup"
+            setMuseumHours(null);
+            setMuseumClosed(true);
+          }
+          matched = true;
+          break;
+        }
+      }
+
+      if (!matched) {
+        // Tidak ada jadwal yang cocok, asumsikan tutup
+        setMuseumHours(null);
+        setMuseumClosed(true);
+      }
+    } catch (err) {
+      console.error('Gagal mengambil jam museum:', err);
+      setMuseumHours({ open: 8, close: 17 });
+      setMuseumClosed(false);
+    } finally {
+      setLoadingMuseumHours(false);
+    }
+  }, [bookingDate]);
+
+  // Re-fetch jam museum ketika tanggal berubah
+  useEffect(() => {
+    if (selectedMuseum) {
+      fetchMuseumHours(selectedMuseum);
+    }
+  }, [bookingDate, selectedMuseum, fetchMuseumHours]);
 
   // FETCH JAM YANG SUDAH DIPESAN DARI SUPABASE
   const fetchBookedHours = useCallback(async () => {
@@ -156,16 +260,24 @@ export const TourGuideDetailPage: React.FC = () => {
     );
   }
 
-  // Semua slot jam yang tersedia (08:00 - 17:00)
-  const ALL_HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+  // Generate slot jam berdasarkan jam operasional museum
+  const ALL_HOURS = (() => {
+    if (!museumHours) return [8, 9, 10, 11, 12, 13, 14, 15, 16, 17]; // default
+    const hours: number[] = [];
+    for (let h = museumHours.open; h < museumHours.close; h++) {
+      hours.push(h);
+    }
+    return hours;
+  })();
 
   // Cek apakah suatu jam sudah dipesan
   const isHourBooked = (hour: number) => bookedHours.includes(hour);
 
   // Hitung durasi maksimal yang bisa dipilih dari jam mulai tertentu
   const getMaxDuration = (startHour: number): number => {
+    const closeHour = museumHours?.close ?? 18;
     let max = 0;
-    for (let h = startHour; h <= 17; h++) {
+    for (let h = startHour; h < closeHour; h++) {
       if (isHourBooked(h)) break;
       max++;
     }
@@ -324,7 +436,9 @@ export const TourGuideDetailPage: React.FC = () => {
                         value={selectedMuseum}
                         onValueChange={(value) => {
                           setSelectedMuseum(value);
-                          setSelectedSlots([]);
+                          setSelectedStartHour(null);
+                          setSelectedDuration(1);
+                          fetchMuseumHours(value);
                         }}
                       >
                         <SelectTrigger className="mt-2 rounded-xl border-[#b59a5b]/20 bg-[#0a1f1a]/40">
@@ -341,7 +455,15 @@ export const TourGuideDetailPage: React.FC = () => {
                     {bookingDate && selectedMuseum && (
                       <div>
                         <Label className="text-[#c8c2b8]">Pilih Jam Mulai</Label>
-                        {loadingSlots ? (
+
+                        {museumClosed && (
+                          <div className="mt-2 flex items-center gap-2 rounded-xl border border-red-500/25 bg-red-900/15 px-4 py-3 text-sm text-red-400">
+                            <AlertCircle className="h-4 w-4 shrink-0" />
+                            <span>Museum ini <strong>tutup</strong> pada hari {format(bookingDate, 'EEEE')} yang dipilih. Silakan pilih tanggal lain.</span>
+                          </div>
+                        )}
+
+                        {!museumClosed && (loadingSlots || loadingMuseumHours ? (
                           <div className="mt-2 flex items-center gap-2 text-sm text-[#a09a90]">
                             <Clock className="h-4 w-4 animate-spin" />
                             Memuat ketersediaan jam...
@@ -395,7 +517,7 @@ export const TourGuideDetailPage: React.FC = () => {
                               </div>
                             )}
                           </>
-                        )}
+                        ))}
                       </div>
                     )}
 
